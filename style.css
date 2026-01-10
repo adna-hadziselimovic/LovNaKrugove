@@ -1,0 +1,573 @@
+/* Import cute Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;900&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET & BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Quicksand', 'Comic Sans MS', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #cadede 0%, #fae2e2 50%, #c3c5e2 100%);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN LAYOUT - FULLSCREEN & CENTERED
+   ═══════════════════════════════════════════════════════════════ */
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ff1493;
+    z-index: 100;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Content wrappers - transparentni, ne remete layout */
+#startContent,
+#gameOverContent {
+    display: contents; /* Ne stvara novi container */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════ */
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #ff1493;
+    text-align: center;
+    text-shadow:
+            3px 3px 0px #ffb3d9,
+            -2px -2px 0px #ff69b4,
+            0 0 20px rgba(255, 20, 147, 0.5);
+    letter-spacing: 2px;
+    animation: titleBounce 2s ease-in-out infinite;
+}
+
+@keyframes titleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+p {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #ff69b4;
+    font-weight: 600;
+}
+
+span {
+    font-weight: 900;
+    color: #ff1493;
+    text-shadow: 1px 1px 2px rgba(255, 182, 193, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS - CANDY STYLE
+   ═══════════════════════════════════════════════════════════════ */
+
+button {
+    margin: 20px auto;
+    padding: 18px 45px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #ff6b9d, #ff1493);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow:
+            0 6px 20px rgba(255, 20, 147, 0.4),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+
+/* Glossy highlight on button */
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+    );
+    transition: left 0.5s;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 40%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    filter: blur(10px);
+    pointer-events: none;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #ff1493, #c51162);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow:
+            0 10px 30px rgba(255, 20, 147, 0.6),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    transform: translateY(0) scale(1);
+    box-shadow:
+            0 4px 15px rgba(255, 20, 147, 0.4),
+            inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GAME SCREEN
+   ═══════════════════════════════════════════════════════════════ */
+
+#gameScreen {
+    display: block;
+}
+
+#gameCanvas {
+    display: block;
+    cursor: crosshair;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Game info - Candy style */
+#gameInfo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px 25px;
+    border-radius: 20px;
+    border: 3px solid #ff69b4;
+    font-size: 1.2rem;
+    color: #ff1493;
+    z-index: 10;
+    box-shadow: 0 5px 20px rgba(255, 105, 180, 0.4);
+    pointer-events: none;
+}
+
+#score, #points {
+    margin-bottom: 5px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   USERNAME INPUT - CANDY STYLE
+   ═══════════════════════════════════════════════════════════════ */
+
+.input-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-container label {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    color: #ff1493;
+    font-weight: 700;
+}
+
+#username {
+    padding: 12px 25px;
+    font-size: 1.2rem;
+    border: 3px solid #ff69b4;
+    border-radius: 25px;
+    background: white;
+    color: #ff1493;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.2);
+}
+
+#username:focus {
+    border-color: #ff1493;
+    box-shadow:
+            0 0 20px rgba(255, 105, 180, 0.6),
+            0 4px 15px rgba(255, 105, 180, 0.3);
+    transform: scale(1.05);
+}
+
+#username::placeholder {
+    color: #ffb3d9;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SKIN SELECTION - CANDY STYLE
+   ═══════════════════════════════════════════════════════════════ */
+
+.skin-container {
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.skin-container label {
+    font-size: 1.2rem;
+    margin-bottom: 18px;
+    color: #ff1493;
+    font-weight: 700;
+}
+
+.skin-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.skin-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 15px;
+    background: rgba(255, 182, 193, 0.2);
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+}
+
+/* Glossy overlay on skin option */
+.skin-option::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 15px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+.skin-option:hover {
+    background: rgba(255, 182, 193, 0.4);
+    transform: scale(1.1) rotate(3deg);
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+}
+
+.skin-option.selected {
+    border: 3px solid #ff1493;
+    background: rgba(255, 105, 180, 0.3);
+    transform: scale(1.15);
+    box-shadow:
+            0 0 30px rgba(255, 20, 147, 0.7),
+            0 0 15px rgba(255, 255, 255, 0.8);
+    animation: candyPulse 1s ease-in-out infinite;
+}
+
+@keyframes candyPulse {
+    0%, 100% {
+        box-shadow:
+                0 0 30px rgba(255, 20, 147, 0.7),
+                0 0 15px rgba(255, 255, 255, 0.8);
+    }
+    50% {
+        box-shadow:
+                0 0 40px rgba(255, 20, 147, 0.9),
+                0 0 25px rgba(255, 255, 255, 1);
+    }
+}
+
+/* Sparkle on selected skin */
+.skin-option.selected::after {
+    content: '✨';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 1.5em;
+    animation: sparkleRotate 2s linear infinite;
+}
+
+@keyframes sparkleRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.skin-preview {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    border: 4px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            inset 0 2px 8px rgba(255, 255, 255, 0.5);
+    position: relative;
+}
+
+.skin-preview::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 20%;
+    width: 35%;
+    height: 35%;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    filter: blur(5px);
+}
+
+.skin-option span {
+    font-size: 0.95rem;
+    color: #ff1493;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATS CONTAINER - CANDY STYLE
+   ═══════════════════════════════════════════════════════════════ */
+
+.stats-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 4px solid #ff69b4;
+    padding: 30px 40px;
+    border-radius: 20px;
+    margin: 20px auto;
+    max-width: 550px;
+    box-shadow: 0 8px 30px rgba(255, 105, 180, 0.4);
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 2px solid rgba(255, 105, 180, 0.2);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item.highlight {
+    background: linear-gradient(180deg, #fff4a3, #ffd700);
+    padding: 18px 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+    border: 3px solid #ffaa00;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.stat-label {
+    color: #ff69b4;
+    font-size: 1.1rem;
+    padding-right: 30px;
+    font-weight: 600;
+}
+
+.stat-value {
+    color: #ff1493;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-shadow: 1px 1px 2px rgba(255, 182, 193, 0.5);
+}
+
+.stat-item.highlight .stat-label {
+    color: #ff6b00;
+    font-weight: bold;
+}
+
+.stat-item.highlight .stat-value {
+    color: #ff6b00;
+    font-size: 1.6rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INFO BOX - CANDY STYLE
+   ═══════════════════════════════════════════════════════════════ */
+
+.info-box {
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 4px solid #ff69b4;
+    padding: 18px 25px;
+    border-radius: 20px;
+    max-width: 650px;
+    box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+}
+
+.info-box h3 {
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+    color: #ff1493;
+    text-align: center;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(255, 182, 193, 0.5);
+}
+
+.power-info p {
+    font-size: 1rem;
+    margin: 10px 0;
+    text-align: left;
+    line-height: 1.6;
+    color: #ff69b4;
+    font-weight: 600;
+}
+
+/* Candy-themed power-up colors */
+.power-info strong#ghost {
+    color: #4863A0;
+    text-shadow: 0 0 5px rgba(0, 217, 255, 0.5);
+    font-weight: 900;
+}
+
+.power-info strong#magnet {
+    color: #7B679A;
+    text-shadow: 0 0 5px rgba(179, 102, 255, 0.5);
+    font-weight: 900;
+}
+
+.power-info p::before {
+    margin-right: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING - SPINNING CANDY
+   ═══════════════════════════════════════════════════════════════ */
+
+.candy-loader {
+    width: 100px;
+    height: 100px;
+    margin: 30px auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    animation: spinEmoji 1.5s linear infinite;
+}
+
+.candy-loader::before {
+    content: '🍬';
+    display: block;
+}
+
+@keyframes spinEmoji {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #ff1493;
+    font-weight: bold;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Loading overlay (za vrijeme igre) */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    flex-direction: column;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .skin-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    button {
+        padding: 15px 35px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    .stats-container {
+        padding: 20px 25px;
+    }
+
+    .skin-preview {
+        width: 50px;
+        height: 50px;
+    }
+}

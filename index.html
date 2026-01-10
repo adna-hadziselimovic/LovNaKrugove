@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lov na Krugove</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="startScreen" class="screen">
+    <h1>Lov na Krugove</h1>
+
+    <div id="startContent">
+        <div class="input-container">
+            <label for="username">Unesi svoj nadimak:</label>
+            <input type="text" id="username" maxlength="12" placeholder="Igrač">
+        </div>
+
+        <div class="skin-container">
+            <label>Odaberi skin:</label>
+            <div class="skin-options">
+                <!-- Bubblegum (Classic) -->
+                <div class="skin-option selected" data-skin="classic">
+                    <div class="skin-preview" style="background: linear-gradient(135deg, #ff6b9d, #ffb3d9);"></div>
+                    <span>Bubblegum</span>
+                </div>
+
+                <!-- Orange Pop (Fire) -->
+                <div class="skin-option" data-skin="fire">
+                    <div class="skin-preview" style="background: linear-gradient(135deg, #ff6b35, #ffd93d);"></div>
+                    <span>Orange Pop</span>
+                </div>
+
+                <!-- Mint Ice (Ice) -->
+                <div class="skin-option" data-skin="ice">
+                    <div class="skin-preview" style="background: linear-gradient(135deg, #6bcfff, #b8e6ff);"></div>
+                    <span>Mint Ice</span>
+                </div>
+
+                <!-- Honey Drop (Gold) -->
+                <div class="skin-option" data-skin="gold">
+                    <div class="skin-preview" style="background: linear-gradient(135deg, #ffd700, #fff4a3);"></div>
+                    <span>Honey Drop</span>
+                </div>
+
+                <!-- Grape (umjesto Barbie) -->
+                <div class="skin-option" data-skin="grape">
+                    <div class="skin-preview" style="background: linear-gradient(135deg, #8B5FBF, #D4A5FF);"></div>
+                    <span>Mentos</span>
+                </div>
+
+                <!-- Rainbow Pop -->
+                <div class="skin-option" data-skin="rainbow">
+                    <div class="skin-preview" style="background: linear-gradient(135deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff);"></div>
+                    <span>Rainbow Pop</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="startBtn">Započni igru</button>
+
+        <div class="info-box">
+            <h3>⚡ Power-ups ⚡</h3>
+            <div class="power-info">
+                <p><strong id="magnet">Magnet (M)</strong> - Privlači manje krugove prema tebi</p>
+                <p><strong id="ghost">Ghost (G)</strong> - Privremena zaštita od većih krugova</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="gameScreen" class="screen hidden">
+    <div id="gameInfo">
+        <div id="points">Score: <span id="playerPoints">0</span></div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+
+<div id="gameOverScreen" class="screen hidden">
+    <!-- 🍭 LOADER (prikazan prvo) -->
+    <div id="gameOverLoader" class="candy-loader"></div>
+    <div id="gameOverLoadingText" class="loading-text">Računanje rezultata...</div>
+
+    <!-- Game over content (hidden dok se učitava) -->
+    <div id="gameOverContent" style="display: none;">
+        <h1>Izgubio si!</h1>
+        <p id="gameOverName"></p>
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-label">Vrijeme preživljavanja:</span>
+                <span class="stat-value" id="timeAlive">0s</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Krugova pojedeno:</span>
+                <span class="stat-value" id="circlesEatenStat">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Konačna veličina:</span>
+                <span class="stat-value" id="finalSize">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Score:</span>
+                <span class="stat-value" id="finalPoints">0</span>
+            </div>
+            <div class="stat-item highlight">
+                <span class="stat-label">🏆 Top Score:</span>
+                <span class="stat-value" id="topScoreStat">0</span>
+            </div>
+        </div>
+        <button id="restartBtn">Igraj ponovo</button>
+    </div>
+</div>
+
+<div id="gameLoadingOverlay" class="loading-overlay">
+    <div class="candy-loader"></div>
+    <div class="loading-text">Priprema igre...</div>
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>
