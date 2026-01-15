@@ -1,9 +1,4 @@
-/* Import cute Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;900&display=swap');
-
-/* ═══════════════════════════════════════════════════════════════
-   RESET & BASE STYLES
-   ═══════════════════════════════════════════════════════════════ */
 
 * {
     margin: 0;
@@ -26,10 +21,6 @@ body {
     position: relative;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SCREEN LAYOUT - FULLSCREEN & CENTERED
-   ═══════════════════════════════════════════════════════════════ */
-
 .screen {
     position: absolute;
     top: 0;
@@ -48,15 +39,10 @@ body {
     display: none !important;
 }
 
-/* Content wrappers - transparentni, ne remete layout */
 #startContent,
 #gameOverContent {
-    display: contents; /* Ne stvara novi container */
+    display: contents;
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   TYPOGRAPHY
-   ═══════════════════════════════════════════════════════════════ */
 
 h1 {
     font-size: 3.5rem;
@@ -64,8 +50,8 @@ h1 {
     color: #ff1493;
     text-align: center;
     text-shadow:
-            3px 3px 0px #ffb3d9,
-            -2px -2px 0px #ff69b4,
+            3px 3px 0 #ffb3d9,
+            -2px -2px 0 #ff69b4,
             0 0 20px rgba(255, 20, 147, 0.5);
     letter-spacing: 2px;
     animation: titleBounce 2s ease-in-out infinite;
@@ -90,10 +76,6 @@ span {
     text-shadow: 1px 1px 2px rgba(255, 182, 193, 0.5);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BUTTONS - CANDY STYLE
-   ═══════════════════════════════════════════════════════════════ */
-
 button {
     margin: 20px auto;
     padding: 18px 45px;
@@ -115,7 +97,6 @@ button {
     display: block;
 }
 
-/* Glossy highlight on button */
 button::before {
     content: '';
     position: absolute;
@@ -165,10 +146,6 @@ button:active {
             inset 0 3px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   GAME SCREEN
-   ═══════════════════════════════════════════════════════════════ */
-
 #gameScreen {
     display: block;
 }
@@ -180,7 +157,6 @@ button:active {
     height: 100vh;
 }
 
-/* Game info - Candy style */
 #gameInfo {
     position: absolute;
     top: 20px;
@@ -199,10 +175,6 @@ button:active {
 #score, #points {
     margin-bottom: 5px;
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   USERNAME INPUT - CANDY STYLE
-   ═══════════════════════════════════════════════════════════════ */
 
 .input-container {
     margin-top: 20px;
@@ -245,10 +217,6 @@ button:active {
     color: #ffb3d9;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SKIN SELECTION - CANDY STYLE
-   ═══════════════════════════════════════════════════════════════ */
-
 .skin-container {
     margin: 20px;
     display: flex;
@@ -282,7 +250,6 @@ button:active {
     position: relative;
 }
 
-/* Glossy overlay on skin option */
 .skin-option::before {
     content: '';
     position: absolute;
@@ -309,10 +276,10 @@ button:active {
     box-shadow:
             0 0 30px rgba(255, 20, 147, 0.7),
             0 0 15px rgba(255, 255, 255, 0.8);
-    animation: candyPulse 1s ease-in-out infinite;
+    animation: skinPulse 1s ease-in-out infinite;
 }
 
-@keyframes candyPulse {
+@keyframes skinPulse {
     0%, 100% {
         box-shadow:
                 0 0 30px rgba(255, 20, 147, 0.7),
@@ -325,7 +292,6 @@ button:active {
     }
 }
 
-/* Sparkle on selected skin */
 .skin-option.selected::after {
     content: '✨';
     position: absolute;
@@ -370,10 +336,6 @@ button:active {
     font-weight: 700;
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   STATS CONTAINER - CANDY STYLE
-   ═══════════════════════════════════════════════════════════════ */
 
 .stats-container {
     background: rgba(255, 255, 255, 0.95);
@@ -430,10 +392,6 @@ button:active {
     font-size: 1.6rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   INFO BOX - CANDY STYLE
-   ═══════════════════════════════════════════════════════════════ */
-
 .info-box {
     margin-top: 10px;
     background: rgba(255, 255, 255, 0.95);
@@ -462,10 +420,9 @@ button:active {
     font-weight: 600;
 }
 
-/* Candy-themed power-up colors */
 .power-info strong#ghost {
     color: #4863A0;
-    text-shadow: 0 0 5px rgba(0, 217, 255, 0.5);
+    text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
     font-weight: 900;
 }
 
@@ -479,11 +436,7 @@ button:active {
     margin-right: 8px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   LOADING - SPINNING CANDY
-   ═══════════════════════════════════════════════════════════════ */
-
-.candy-loader {
+.loader {
     width: 100px;
     height: 100px;
     margin: 30px auto;
@@ -495,7 +448,7 @@ button:active {
     animation: spinEmoji 1.5s linear infinite;
 }
 
-.candy-loader::before {
+.loader::before {
     content: '🍬';
     display: block;
 }
@@ -519,7 +472,6 @@ button:active {
     50% { opacity: 0.5; }
 }
 
-/* Loading overlay (za vrijeme igre) */
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -538,36 +490,125 @@ button:active {
     display: flex;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE ADJUSTMENTS
-   ═══════════════════════════════════════════════════════════════ */
-
 @media (max-width: 768px) {
     h1 {
-        font-size: 2.5rem;
+        font-size: 2.8rem !important;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
     }
 
     .skin-options {
         grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        max-width: 90vw;
     }
 
     button {
         padding: 15px 35px;
         font-size: 1.1rem;
+        min-width: 200px;
+        margin: 15px auto;
+    }
+
+    .stats-container {
+        padding: 25px 30px;
+        max-width: 90vw;
+        margin: 15px auto;
+    }
+
+    #username {
+        width: 280px;
+        max-width: 90vw;
+    }
+
+    .skin-preview {
+        width: 55px;
+        height: 55px;
     }
 }
 
 @media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
     h1 {
-        font-size: 2rem;
+        font-size: 2.2rem !important;
+        line-height: 1.2;
+        margin-bottom: 10px;
+        padding: 0 10px;
+    }
+
+    p {
+        font-size: 1.1rem;
+        padding: 0 15px;
+        line-height: 1.4;
+    }
+
+    button {
+        padding: 14px 30px !important;
+        font-size: 1rem !important;
+        min-width: 180px;
+        margin: 12px auto !important;
+        width: 85vw;
+        max-width: 280px;
     }
 
     .stats-container {
-        padding: 20px 25px;
+        padding: 20px 25px !important;
+        margin: 15px 10px !important;
+        max-width: calc(100vw - 20px);
+    }
+
+    .stat-item {
+        padding: 10px 0;
+        font-size: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.3rem !important;
+    }
+
+    #username {
+        width: calc(100vw - 60px) !important;
+        max-width: 260px;
+        padding: 12px 20px;
+        margin-bottom: 15px;
+    }
+
+    .skin-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 0 10px;
+        max-width: calc(100vw - 40px);
     }
 
     .skin-preview {
-        width: 50px;
-        height: 50px;
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .skin-option span {
+        font-size: 0.85rem;
+    }
+
+    .info-box {
+        padding: 15px 20px;
+        margin: 15px 10px;
+        max-width: calc(100vw - 40px);
+    }
+
+    #gameInfo {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 12px 18px;
+        font-size: 1rem;
+    }
+
+    .loader {
+        width: 80px;
+        height: 80px;
+        font-size: 4rem;
     }
 }

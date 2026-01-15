@@ -1,14 +1,9 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('gameCanvas');
-    document.querySelectorAll('#gameScreen > *:not(#gameCanvas)').forEach(el => {
-        el.style.pointerEvents = 'none';
-        el.style.userSelect = 'none';
-    });
 
     canvas.style.pointerEvents = 'auto';
     const ctx = canvas.getContext('2d');
 
-    // Screen elements
     const startScreen = document.getElementById('startScreen');
     const gameScreen = document.getElementById('gameScreen');
     const gameOverScreen = document.getElementById('gameOverScreen');
@@ -16,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const restartBtn = document.getElementById('restartBtn');
     const usernameInput = document.getElementById('username');
 
-    // Game state
     let gameRunning = false;
     let player;
     let circles = [];
@@ -38,14 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let ghostTimer = 0;
     let powerUpSpawnTimer = 0;
 
-    // Game constants
     let CANVAS_WIDTH = window.innerWidth;
     let CANVAS_HEIGHT = window.innerHeight;
     const INITIAL_PLAYER_RADIUS = 30;
     const GROWTH_RATE = 1.0;
     const NUM_CIRCLES = 25;
     const MIN_CIRCLE_RADIUS = 8;
-    const MAX_CIRCLE_RADIUS = 45;
     const CIRCLE_SPEED = 0.8;
     const PLAYER_SPEED = 4;
     const AI_GROWTH_FACTOR = 0.25;
@@ -54,43 +46,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const MAGNET_RADIUS = 300;
     const POWERUP_SPAWN_INTERVAL = 600;
 
-    // 🍭 CANDY THEME SKINS
+    // SKINOVI
     const skins = {
-        classic: {
-            type: 'candy',
-            baseColor: '#ff6b9d',
-            accentColor: '#ffb3d9',
-            name: 'Bubblegum',
-            pattern: 'solid'
-        },
-        fire: {
-            type: 'candy',
-            baseColor: '#ff6b35',
-            accentColor: '#ffd93d',
-            name: 'Orange Pop',
-            pattern: 'swirl'
-        },
-        ice: {
-            type: 'candy',
-            baseColor: '#6bcfff',
-            accentColor: '#b8e6ff',
-            name: 'Mint Ice',
-        },
-        gold: {
-            type: 'candy',
-            baseColor: '#ffd700',
-            accentColor: '#fff4a3',
-            name: 'Honey Drop',
-        },
-        grape: {
-            type: 'candy',
-            baseColor: '#8B5FBF',      // Deep purple
-            accentColor: '#D4A5FF',     // Lavender
-            name: 'Grape',
-            pattern: 'solid'
-        },
+        classic: { baseColor: '#ff6b9d', accentColor: '#ffb3d9', name: 'Bubblegum', pattern: 'solid' },
+        fire: { baseColor: '#ff6b35', accentColor: '#ffd93d', name: 'Orange Pop', pattern: 'swirl' },
+        ice: { baseColor: '#6bcfff', accentColor: '#b8e6ff', name: 'Mint Ice' },
+        gold: { baseColor: '#ffd700', accentColor: '#fff4a3', name: 'Honey Drop' },
+        grape: { baseColor: '#8B5FBF', accentColor: '#D4A5FF', name: 'Grape', pattern: 'solid' },
         rainbow: {
-            type: 'candy',
             baseColor: 'rainbow',
             colors: ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#8b00ff'],
             name: 'Rainbow Pop',
@@ -98,29 +61,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Skin selection
+    // Odabir skinova
     const skinOptions = document.querySelectorAll('.skin-option');
     skinOptions.forEach(option => {
-        option.addEventListener('click', function() {
+        option.addEventListener('click', function () {
             skinOptions.forEach(opt => opt.classList.remove('selected'));
             this.classList.add('selected');
             playerSkin = this.getAttribute('data-skin');
         });
     });
 
-    // Set canvas size to full window
+    let bgGradient;
+    // Set canvas size
     function resizeCanvas() {
         CANVAS_WIDTH = window.innerWidth;
         CANVAS_HEIGHT = window.innerHeight;
         canvas.width = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
+
+        bgGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+        bgGradient.addColorStop(0, '#cadede');
+        bgGradient.addColorStop(0.5, '#fae2e2');
+        bgGradient.addColorStop(1, '#c3c5e2');
     }
     resizeCanvas();
-
-    // Resize canvas when window is resized
     window.addEventListener('resize', resizeCanvas);
 
-    // Circle class
+    function showScreen(screen) {
+        startScreen.classList.add('hidden');
+        gameScreen.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+
+        if (screen === 'start') {
+            startScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+        } else if (screen === 'game') {
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+        } else if (screen === 'gameOver') {
+            gameOverScreen.classList.remove('hidden');
+        }
+    }
+
+    function getDarkerColor(color) {
+        if (color.startsWith('#')) {
+            const r = parseInt(color.slice(1, 3), 16);
+            const g = parseInt(color.slice(3, 5), 16);
+            const b = parseInt(color.slice(5, 7), 16);
+            return `rgb(${Math.floor(r * 0.5)}, ${Math.floor(g * 0.5)}, ${Math.floor(b * 0.5)})`;
+        }
+        return 'rgba(0, 0, 0, 0.7)';
+    }
+
+    function drawGlossyHighlight(x, y, radius, opacity1 = 0.8, opacity2 = 0.3) {
+        const highlight = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, 0, x, y, radius);
+        highlight.addColorStop(0, `rgba(255, 255, 255, ${opacity1})`);
+        highlight.addColorStop(0.4, `rgba(255, 255, 255, ${opacity2})`);
+        highlight.addColorStop(1, 'transparent');
+        ctx.fillStyle = highlight;
+        ctx.fill();
+    }
+
+    function updateStat(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
     class Circle {
         constructor(x, y, radius, color, isPlayer = false, skinData = null) {
             this.x = x;
@@ -141,138 +146,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
         draw() {
             ctx.save();
-
             if (this.isPlayer && this.skinData) {
-                // PLAYER CANDY STYLE
-                this.drawCandyStyle(this.skinData);
+                this.drawCircleContent(this.skinData, true);
             } else {
-                // TARGET CIRCLES - Candy style
-                this.drawTargetCandy();
+                this.drawCircleContent({ baseColor: this.color }, false);
             }
-
             ctx.restore();
         }
 
-        getDarkerColor(color) {
-            // Za hex boje
-            if (color.startsWith('#')) {
-                const r = parseInt(color.slice(1, 3), 16);
-                const g = parseInt(color.slice(3, 5), 16);
-                const b = parseInt(color.slice(5, 7), 16);
-                return `rgb(${Math.floor(r * 0.5)}, ${Math.floor(g * 0.5)}, ${Math.floor(b * 0.5)})`;
-            }
-            return 'rgba(0, 0, 0, 0.7)'; // Fallback
-        }
-
-        // 🍬 CANDY STYLE ZA IGRAČA
-        drawCandyStyle(skin) {
-            // Base candy circle
+        drawCircleContent(data, isPlayerSkin) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 
-            // Pattern based on skin
-            if (skin.pattern === 'rainbow') {
-                // Rainbow gradient
+            if (isPlayerSkin && data.pattern === 'rainbow') {
                 const gradient = ctx.createConicGradient(0, this.x, this.y);
-                skin.colors.forEach((color, index) => {
-                    gradient.addColorStop(index / skin.colors.length, color);
+                data.colors.forEach((color, index) => {
+                    gradient.addColorStop(index / data.colors.length, color);
                 });
                 ctx.fillStyle = gradient;
-            } else if (skin.pattern === 'swirl') {
-                // Swirl pattern
-                const gradient = ctx.createRadialGradient(
-                    this.x, this.y, 0,
-                    this.x, this.y, this.radius
-                );
-                gradient.addColorStop(0, skin.baseColor);
-                gradient.addColorStop(0.5, skin.accentColor);
-                gradient.addColorStop(1, skin.baseColor);
+            } else if (isPlayerSkin && data.pattern === 'swirl') {
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+                gradient.addColorStop(0, data.baseColor);
+                gradient.addColorStop(0.5, data.accentColor);
+                gradient.addColorStop(1, data.baseColor);
                 ctx.fillStyle = gradient;
             } else {
-                ctx.fillStyle = skin.baseColor;
+                ctx.fillStyle = data.baseColor;
             }
-
             ctx.fill();
 
-            // Glossy highlight (KLJUČNO ZA CANDY IZGLED)
-            const highlight = ctx.createRadialGradient(
-                this.x - this.radius * 0.3,
-                this.y - this.radius * 0.3,
-                0,
-                this.x,
-                this.y,
-                this.radius
-            );
-            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-            highlight.addColorStop(0.4, 'rgba(255, 255, 255, 0.4)');
-            highlight.addColorStop(1, 'transparent');
-            ctx.fillStyle = highlight;
-            ctx.fill();
+            drawGlossyHighlight(this.x, this.y, this.radius);
 
-            // Patterns overlay
-            if (skin.pattern === 'stripes') {
-                ctx.strokeStyle = skin.accentColor;
-                ctx.lineWidth = this.radius / 8;
-                for (let i = -this.radius; i < this.radius; i += this.radius / 3) {
-                    ctx.beginPath();
-                    ctx.moveTo(this.x + i, this.y - this.radius);
-                    ctx.lineTo(this.x + i, this.y + this.radius);
-                    ctx.stroke();
-                }
-            } else if (skin.pattern === 'spots') {
-                ctx.fillStyle = skin.accentColor;
-                const spots = 6;
-                for (let i = 0; i < spots; i++) {
-                    const angle = (Math.PI * 2 * i) / spots;
-                    const spotX = this.x + Math.cos(angle) * this.radius * 0.5;
-                    const spotY = this.y + Math.sin(angle) * this.radius * 0.5;
-                    ctx.beginPath();
-                    ctx.arc(spotX, spotY, this.radius * 0.15, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+            if (isPlayerSkin) {
+                ctx.strokeStyle = getDarkerColor(data.baseColor);
+                ctx.lineWidth = 3;
+            } else {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
             }
-
-            // Cute border
-            ctx.strokeStyle = this.getDarkerColor(skin.baseColor);
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.stroke();
-
-        }
-
-        // 🍭 CANDY STYLE ZA TARGET KRUGOVE
-        drawTargetCandy() {
-            // Random candy colors for targets
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-
-            // Glossy highlight
-            const highlight = ctx.createRadialGradient(
-                this.x - this.radius * 0.3,
-                this.y - this.radius * 0.3,
-                0,
-                this.x,
-                this.y,
-                this.radius
-            );
-            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-            highlight.addColorStop(0.3, 'rgba(255, 255, 255, 0.3)');
-            highlight.addColorStop(1, 'transparent');
-            ctx.fillStyle = highlight;
-            ctx.fill();
-
-            // Border
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.lineWidth = 2;
             ctx.stroke();
         }
 
         update() {
             if (this.isPlayer) {
-                // Move player towards mouse
                 const dx = mouse.x - this.x;
                 const dy = mouse.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -282,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.y += (dy / distance) * PLAYER_SPEED;
                 }
             } else {
-                // Smooth growth
                 if (player) {
                     const playerGrowthRatio = player.radius / INITIAL_PLAYER_RADIUS;
                     const aiGrowthRatio = 1 + (playerGrowthRatio - 1) * AI_GROWTH_FACTOR;
@@ -304,11 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
 
-                // Move circles
+                // Pomjeranje krugova
                 this.x += this.vx;
                 this.y += this.vy;
 
-                // Change direction randomly
+                // Nasumična promjena smjera
                 this.directionChangeTimer--;
                 if (this.directionChangeTimer <= 0) {
                     const angle = Math.random() * Math.PI * 2;
@@ -318,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Boundary collision
+            // Kolizija s ivicama canvasa
             if (this.x - this.radius < 0) {
                 this.x = this.radius;
                 if (!this.isPlayer) this.vx = Math.abs(this.vx);
@@ -351,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Particle class za vizuelne efekte
+    // Vizuelni efekat nakon jedenja kruga
     class Particle {
         constructor(x, y, color) {
             this.x = x;
@@ -392,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 🍭 CANDY POWER-UP CLASS
+    // POWER-UP
     class PowerUp {
         constructor(x, y, type) {
             this.x = x;
@@ -411,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const pulse = Math.sin(this.pulseTimer) * 3;
 
-            // Blink warning
+            // Upozorenje za istek trajanja
             const shouldBlink = this.lifeTimer > (this.maxLife - this.warningThreshold);
             const blinkVisible = shouldBlink ? Math.floor(this.lifeTimer / 10) % 2 === 0 : true;
 
@@ -419,14 +334,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             ctx.save();
 
-            // Fade out effect
+            // Nestajanje
             const fadeStart = this.maxLife - this.warningThreshold;
             if (this.lifeTimer > fadeStart) {
                 const fadeProgress = (this.lifeTimer - fadeStart) / this.warningThreshold;
                 ctx.globalAlpha = 1 - (fadeProgress * 0.5);
             }
 
-            // Draw triangle
             this.drawTriangle(pulse);
 
             ctx.restore();
@@ -435,26 +349,22 @@ document.addEventListener('DOMContentLoaded', function() {
         drawTriangle(pulse) {
             const size = this.radius + pulse;
 
-            // Triangle shape
             ctx.beginPath();
-            ctx.moveTo(this.x, this.y - size);                      // Top
-            ctx.lineTo(this.x + size * 0.87, this.y + size * 0.5); // Bottom right
-            ctx.lineTo(this.x - size * 0.87, this.y + size * 0.5); // Bottom left
+            ctx.moveTo(this.x, this.y - size);
+            ctx.lineTo(this.x + size * 0.87, this.y + size * 0.5);
+            ctx.lineTo(this.x - size * 0.87, this.y + size * 0.5);
             ctx.closePath();
 
-            // Gradient based on type
             const gradient = ctx.createRadialGradient(
                 this.x, this.y, 0,
                 this.x, this.y, size
             );
 
             if (this.type === 'magnet') {
-                // Purple gradient
                 gradient.addColorStop(0, '#9D4EDD');
                 gradient.addColorStop(0.5, '#C77DFF');
                 gradient.addColorStop(1, '#7209B7');
             } else if (this.type === 'ghost') {
-                // Cyan gradient
                 gradient.addColorStop(0, '#06FFA5');
                 gradient.addColorStop(0.5, '#00D9FF');
                 gradient.addColorStop(1, '#0099CC');
@@ -463,27 +373,13 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillStyle = gradient;
             ctx.fill();
 
-            // Glossy highlight
-            const highlight = ctx.createRadialGradient(
-                this.x - size * 0.3,
-                this.y - size * 0.3,
-                0,
-                this.x,
-                this.y,
-                size
-            );
-            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-            highlight.addColorStop(0.4, 'rgba(255, 255, 255, 0.3)');
-            highlight.addColorStop(1, 'transparent');
-            ctx.fillStyle = highlight;
-            ctx.fill();
+            drawGlossyHighlight(this.x, this.y, size, 0.9, 0.3);
 
-            // White border
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Letter
+            // Oznaka tipa power-upa
             ctx.fillStyle = 'white';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
@@ -499,8 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // Collision detection
+    // Detekcija kolizije
     function getDistance(x1, y1, x2, y2) {
         const dx = x2 - x1;
         const dy = y2 - y1;
@@ -512,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return distance < circle1.radius + circle2.radius;
     }
 
-    // Initialize game
+    // Pokretanje igre
     function initGame() {
         circles = [];
         points = 0;
@@ -565,22 +460,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 🍭 CANDY THEME GAME LOOP
     function gameLoop() {
         if (!gameRunning) return;
 
-        // 🎨 CANDY GRADIENT BACKGROUND
-        const bgGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-        bgGradient.addColorStop(0, '#cadede');    // Light pink
-        bgGradient.addColorStop(0.5, '#fae2e2');  // Light blue
-        bgGradient.addColorStop(1, '#c3c5e2');    // Lavender blush
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        ctx.strokeStyle = 'rgba(255, 182, 193, 0.25)'; // Soft pink
+        ctx.strokeStyle = 'rgba(255, 182, 193, 0.25)';
         ctx.lineWidth = 1;
 
-        // Vertical lines
         for (let i = 0; i < CANVAS_WIDTH; i += 50) {
             ctx.beginPath();
             ctx.moveTo(i, 0);
@@ -588,7 +476,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.stroke();
         }
 
-        // Horizontal lines
         for (let i = 0; i < CANVAS_HEIGHT; i += 50) {
             ctx.beginPath();
             ctx.moveTo(0, i);
@@ -599,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gameTime++;
         difficultyTimer++;
 
-        // Power-up timers
+        // Power-up timeri
         if (magnetActive) {
             magnetTimer--;
             if (magnetTimer <= 0) magnetActive = false;
@@ -610,7 +497,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (ghostTimer <= 0) ghostActive = false;
         }
 
-        // Spawn power-ups
         powerUpSpawnTimer++;
         if (powerUpSpawnTimer >= POWERUP_SPAWN_INTERVAL) {
             powerUpSpawnTimer = 0;
@@ -628,7 +514,6 @@ document.addEventListener('DOMContentLoaded', function() {
             powerUps.push(new PowerUp(x, y, type));
         }
 
-        // Difficulty increase
         if (difficultyTimer >= 3600) {
             difficultyTimer = 0;
             circles.forEach(circle => {
@@ -639,13 +524,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Update and draw circles
+        // Crtanje i update krugova
         for (let i = circles.length - 1; i >= 0; i--) {
             circles[i].update();
             circles[i].draw();
         }
 
-        // Update and draw power-ups
+        // Crtanje i update power-upova
         for (let i = powerUps.length - 1; i >= 0; i--) {
             if (powerUps[i].isExpired()) {
                 powerUps.splice(i, 1);
@@ -667,16 +552,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Update and draw particles
+        // Crtanje i update čestica
         for (let i = particles.length - 1; i >= 0; i--) {
             particles[i].update();
             particles[i].draw();
-            if (particles[i].isDead()) {
-                particles.splice(i, 1);
-            }
+            if (particles[i].isDead()) particles.splice(i, 1);
         }
 
-        // Update and draw player
+        // Crtanje i update igrača
         player.update();
         if (ghostActive) {
             ctx.save();
@@ -688,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.restore();
         }
 
-        // Check collisions
+        // Provjera kolizije
         for (let i = circles.length - 1; i >= 0; i--) {
             if (checkCollision(player, circles[i])) {
                 if (player.radius > circles[i].radius) {
@@ -707,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Spawn new circles
+        // Spawn novih krugova
         spawnTimer++;
         const baseSpawnInterval = 180;
         const minSpawnInterval = 90;
@@ -748,9 +631,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        document.getElementById('playerPoints').textContent = points;
+        updateStat('playerPoints', points);
 
-        // Power-up status display
+        // Power-up status
         if (magnetActive || ghostActive) {
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
@@ -778,11 +661,9 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(gameLoop);
     }
 
-    // 🍭 CANDY EXPLOSION EFEKAT
     function createEatEffect(x, y, color, radius) {
         const particleCount = Math.floor(radius / 2) + 15;
 
-        // Starburst particles
         for (let i = 0; i < particleCount; i++) {
             const angle = (Math.PI * 2 * i) / particleCount;
             const speed = Math.random() * 6 + 3;
@@ -790,42 +671,15 @@ document.addEventListener('DOMContentLoaded', function() {
             particles.push(new Particle(x, y, color));
 
             if (i % 3 === 0) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    vx: Math.cos(angle) * speed * 1.5,
-                    vy: Math.sin(angle) * speed * 1.5,
-                    radius: Math.random() * 4 + 2,
-                    color: ['#ffffff', '#ffff00', '#ff69b4'][Math.floor(Math.random() * 3)],
-                    alpha: 1,
-                    life: 0,
-                    maxLife: 25,
-                    update: function() {
-                        this.x += this.vx;
-                        this.y += this.vy;
-                        this.vx *= 0.95;
-                        this.vy *= 0.95;
-                        this.life++;
-                        this.alpha = 1 - (this.life / this.maxLife);
-                        this.radius *= 0.96;
-                    },
-                    draw: function() {
-                        ctx.save();
-                        ctx.globalAlpha = this.alpha;
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = this.color;
-                        ctx.fill();
-                        ctx.restore();
-                    },
-                    isDead: function() {
-                        return this.life >= this.maxLife;
-                    }
-                });
+                const specialColor = ['#ffffff', '#ffff00', '#ff69b4'][Math.floor(Math.random() * 3)];
+                particles.push(new Particle(
+                    x, y, specialColor,
+                    Math.cos(angle) * speed * 1.5,
+                    Math.sin(angle) * speed * 1.5
+                ));
             }
         }
 
-        // Ring explosion
         ctx.save();
         ctx.globalAlpha = 0.7;
         ctx.strokeStyle = '#ffffff';
@@ -849,58 +703,55 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('topScore', topScore);
         }
 
-        document.getElementById('timeAlive').textContent = timeString;
-        document.getElementById('circlesEatenStat').textContent = circlesEaten;
-        document.getElementById('finalSize').textContent = Math.floor(player.radius);
-        document.getElementById('finalPoints').textContent = points;
-        document.getElementById('topScoreStat').textContent = topScore;
+        updateStat('timeAlive', timeString);
+        updateStat('circlesEatenStat', circlesEaten);
+        updateStat('finalSize', Math.floor(player.radius));
+        updateStat('finalPoints', points);
+        updateStat('topScoreStat', topScore);
 
-        gameScreen.classList.add('hidden');
-        gameOverScreen.classList.remove('hidden');
+        showScreen('gameOver');
 
-        const gameOverLoader = document.getElementById('gameOverLoader');
-        const gameOverLoadingText = document.getElementById('gameOverLoadingText');
-        const gameOverContent = document.getElementById('gameOverContent');
+        const loader = document.getElementById('gameOverLoader');
+        const loadingText = document.getElementById('gameOverLoadingText');
+        const content = document.getElementById('gameOverContent');
 
-        gameOverLoader.style.display = 'block';
-        gameOverLoadingText.style.display = 'block';
-        gameOverContent.style.display = 'none';
+        loader.style.display = content.style.display = loadingText.style.display = 'block';
+        content.style.display = 'none';
 
         setTimeout(() => {
-            gameOverLoader.style.display = 'none';
-            gameOverLoadingText.style.display = 'none';
-            gameOverContent.style.display = 'block';
+            loader.style.display = loadingText.style.display = 'none';
+            content.style.display = 'block';
         }, 1000);
     }
 
-    // Mouse tracking
+    // Praćenje pozicije miša
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
         mouse.x = e.clientX - rect.left;
         mouse.y = e.clientY - rect.top;
     });
 
-    // Start game
+    // Počni igru
     startBtn.addEventListener('click', () => {
         const loadingOverlay = document.getElementById('gameLoadingOverlay');
         loadingOverlay.classList.add('active');
 
         setTimeout(() => {
-            startScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
+            showScreen('game');
             loadingOverlay.classList.remove('active');
-            gameRunning = true;
-            initGame();
-            gameLoop();
+            startGame();
         }, 1000);
     });
 
-    // Restart game
+    // Restartuj igru
     restartBtn.addEventListener('click', () => {
-        gameOverScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
+        showScreen('game');
+        startGame();
+    });
+
+    function startGame() {
         gameRunning = true;
         initGame();
-        gameLoop();
-    });
+        requestAnimationFrame(gameLoop);
+    }
 });
